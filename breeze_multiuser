@@ -1,0 +1,760 @@
+Multi User Authentication System-Laravel Breeze
+1.Create Project
+composer create-project  laravel/laravel <projectname>
+composer create-project  laravel/laravel emed
+
+2.Configure your database
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=emed
+DB_USERNAME=root
+DB_PASSWORD=
+
+3.Run database migrations
+php artisan migrate
+
+4.Install Breeze
+composer require laravel/breeze --dev
+php artisan breeze:install
+ Which Breeze stack would you like to install?
+  Blade with Alpine ............................................................................................ blade
+  Livewire (Volt Class API) with Alpine ..................................................................... livewire
+  Livewire (Volt Functional API) with Alpine ..................................................... livewire-functional
+  React with Inertia ........................................................................................... react
+  Vue with Inertia ............................................................................................... vue
+  API only ....................................................................................................... api
+❯ blade
+
+  Would you like dark mode support? (yes/no) [no]
+❯ no
+ Which testing framework do you prefer? [PHPUnit]
+  Pest ............................................................................................................. 0
+  PHPUnit .......................................................................................................... 1
+❯ 1
+
+php artisan migrate
+npm install
+npm run dev
+npm run build
+
+---------------------------------------------------------------------------
+Install Node.js and npm: 
+First, make sure Node.js and npm are installed on your system. You can download and install them from the official Node.js website: Node.js Download.
+
+Check installation: 
+After installing Node.js, open a command prompt or terminal and run the following commands to verify that Node.js and npm are installed correctly:
+
+node -v
+npm -v
+These commands should display the installed versions of Node.js and npm respectively. If they display version numbers, then Node.js and npm are installed correctly.
+
+Add Node.js and npm to PATH: 
+If Node.js and npm are installed but not recognized by the command prompt or terminal, you need to add their installation directories to the system's PATH environment variable.
+
+Windows: 
+On Windows, you can add the Node.js installation directory (which includes npm) to the PATH by following these steps:
+
+1.Right-click on "This PC" or "My Computer" and select "Properties".
+2.Click on "Advanced system settings" on the left.
+3.In the System Properties window, click on the "Environment Variables" button.
+4.In the Environment Variables window, select the "Path" variable under "System variables" and click on "Edit".
+Add the path to the directory where Node.js and npm are installed (usually C:\Program Files\nodejs\ or C:\Program Files\nodejs\node_modules\npm\bin\) to the list of paths. Separate multiple paths with semicolons if necessary.
+5.Click "OK" to save the changes.
+6.Close and reopen any command prompt or terminal windows for the changes to take effect.
+
+macOS/Linux: 
+On macOS and Linux, you can add Node.js and npm to the PATH by modifying the ~/.bash_profile, ~/.bashrc, or ~/.profile file and adding the following line:
+
+ruby
+1.export PATH=$PATH:/path/to/nodejs:/path/to/npm
+2.Replace /path/to/nodejs and /path/to/npm with the actual paths where Node.js and npm are installed.
+3.Then, run source ~/.bash_profile, source ~/.bashrc, or source ~/.profile to apply the changes to your current terminal session, or restart your terminal.
+4.Verify installation again: After adding Node.js and npm to the PATH, reopen the command prompt or terminal and run the node -v and npm -v commands again to verify that they are recognized.
+---------------------------------------------------------------------------
+
+5.Modify the User Table
+php artisan make:migration add_role_to_users_table --table=users
+
+6.Edit the migration file to add the role column:
+public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role')->default('user');
+        });
+    }
+public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
+        });
+    }
+7.Run the migration
+php artisan migrate
+
+8.Update the User Model
+protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+    ];
+
+9.Create a users table seeder submit a few test data.
+php artisan make:seeder UsersTableSeeder
+
+Add the dummy data as indicated below according to your different user types
+----------------------------------------------------------------------------------------------------
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class UsersTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        DB::table('users')->insert([
+            //admin
+            [
+                'name' =>  'Admin',
+                'email' => 'admin@gmail.com',
+                'password' => Hash::make('123456789'),
+                'role' => 'admin',
+            ],
+
+            //doctor
+            [
+                'name' =>  'Doctor',
+                'email' => 'doctor@gmail.com',
+                'password' => Hash::make('123456789'),
+                'role' => 'doctor',
+            ],
+
+            //nurse
+            [
+                'name' =>  'Nurse',
+                'email' => 'nurse@gmail.com',
+                'password' => Hash::make('123456789'),
+                'role' => 'nurse',
+            ],
+            //cashier
+            [
+                'name' =>  'Cashier',
+                'email' => 'cashier@gmail.com',
+                'password' => Hash::make('123456789'),
+                'role' => 'cashier',
+            ],
+            //receptionist 
+            [
+                'name' =>  'Receipcitoist',
+                'email' => 'receptionist@gmail.com',
+                'password' => Hash::make('123456789'),
+                'role' => 'receptionist',
+            ]
+        ]);
+    }
+}
+----------------------------------------------------------------------------------------------
+Update the database seeders file and add this line inside the run method(database\seeders\DatabaseSeeder.php)
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        // User::factory(10)->create();
+
+        User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+        ]);
+        $this->call(UsersTableSeeder::class);
+    }
+}
+
+Migrate database and seed data
+php artisan migrate:fresh --seed
+
+10.Create below views
+php artisan make:view admin
+php artisan make:view doctor
+php artisan make:view nurse
+php artisan make:view cashier
+php artisan make:view receptionist
+
+Open the dashboard.blade.php file and copy all the code to the above views separately.
+Change the heder text in each views
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Admin') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    {{ __("You're logged in!") }}
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+
+11.Create a middleware to handle role verification
+php artisan make:middleware RoleMiddleware
+update role middleware
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
+
+class RoleMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next, $role): Response
+    {
+        if (!Auth::check()) {
+            return redirect('login');
+        }
+
+        $user = Auth::user();
+
+        if ($user->role !== $role) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return $next($request);
+    }
+}
+
+12.Register Middleware(\bootstrap\app.php)
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\RoleMiddleware;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__ . '/../routes/web.php',
+        commands: __DIR__ . '/../routes/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'role' => RoleMiddleware::class
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })->create();
+
+13.Create Controllers for Each Role
+php artisan make:controller AdminController
+php artisan make:controller DoctorController
+php artisan make:controller NurseController
+php artisan make:controller CashierController
+php artisan make:controller ReceptionistController
+
+14.Define Methods in Each Controller
+public function index()
+    {
+        return view('admin');
+    }
+
+14.Define route groups for each role in your routes/web.php.
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+    });
+
+    Route::middleware(['role:doctor'])->group(function () {
+        Route::get('/doctor', [DoctorController::class, 'index'])->name('doctor');
+    });
+
+    Route::middleware(['role:nurse'])->group(function () {
+        Route::get('/nurse', [NurseController::class, 'index'])->name('nurse');
+    });
+
+    Route::middleware(['role:cashier'])->group(function () {
+        Route::get('/cashier', [CashierController::class, 'index'])->name('cashier');
+    });
+
+    Route::middleware(['role:receptionist'])->group(function () {
+        Route::get('/receptionist', [ReceptionistController::class, 'index'])->name('receptionist');
+    });
+});
+
+15.Customize AuthenticatedSessionController:
+
+Laravel Breeze uses AuthenticatedSessionController for handling login. Customize the redirection logic in this controller.
+(app/Http/Controllers/Auth/AuthenticatedSessionController.php)
+(First, publish the Breeze controllers if you haven't already:php artisan vendor:publish --tag=laravel-breeze)
+public function store(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
+
+        $request->session()->regenerate();
+
+        //return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user();
+        switch ($user->role) {
+            case 'admin':
+                return redirect()->route('admin');
+            case 'doctor':
+                return redirect()->route('doctor');
+            case 'nurse':
+                return redirect()->route('nurse');
+            case 'cashier':
+                return redirect()->route('cashier');
+            case 'receptionist':
+                return redirect()->route('receptionist');
+            default:
+                return redirect()->route('dashboard');
+        }
+    }
+
+17.Update route file
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\NurseController;
+use App\Http\Controllers\CashierController;
+use App\Http\Controllers\ReceptionistController;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->middleware(['auth', 'verified'])->name('dashboard');
+
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+    });
+
+    Route::middleware(['role:doctor'])->group(function () {
+        Route::get('/doctor', [DoctorController::class, 'index'])->name('doctor');
+    });
+
+    Route::middleware(['role:nurse'])->group(function () {
+        Route::get('/nurse', [NurseController::class, 'index'])->name('nurse');
+    });
+
+    Route::middleware(['role:cashier'])->group(function () {
+        Route::get('/cashier', [CashierController::class, 'index'])->name('cashier');
+    });
+
+    Route::middleware(['role:receptionist'])->group(function () {
+        Route::get('/receptionist', [ReceptionistController::class, 'index'])->name('receptionist');
+    });
+});
+
+18.Add role-specific links for different functionalities
+Defining Role-Specific Routes in web.php
+
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->middleware(['auth', 'verified'])->name('dashboard');
+
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+    });
+
+    Route::middleware(['role:doctor'])->group(function () {
+        Route::get('/doctor', [DoctorController::class, 'index'])->name('doctor');
+        Route::get('/doctor/diagnosis', [DoctorController::class, 'diagnosePatient'])->name('doctor.diagnosis');
+        Route::get('/doctor/prescriptions', [DoctorController::class, 'issuePrescriptions'])->name('doctor.prescriptions');
+        Route::get('/doctor/lab_reports', [DoctorController::class, 'writeLabReports'])->name('doctor.lab_reports');
+    });
+
+    Route::middleware(['role:nurse'])->group(function () {
+        Route::get('/nurse', [NurseController::class, 'index'])->name('nurse');
+        Route::get('/nurse/basic_health', [NurseController::class, 'takeBasicHealthStatus'])->name('nurse.basic_health');
+    });
+
+    Route::middleware(['role:cashier'])->group(function () {
+        Route::get('/cashier', [CashierController::class, 'index'])->name('cashier');
+        Route::get('/cashier/create_bill', [CashierController::class, 'createBill'])->name('cashier.create_bill');
+        Route::get('/cashier/update_payment', [CashierController::class, 'updatePayment'])->name('cashier.update_payment');
+    });
+
+    Route::middleware(['role:receptionist'])->group(function () {
+        Route::get('/receptionist', [ReceptionistController::class, 'index'])->name('receptionist');
+        Route::get('/receptionist/register_patient', [ReceptionistController::class, 'registerPatient'])->name('receptionist.register_patient');
+        Route::get('/receptionist/issue_token', [ReceptionistController::class, 'issueToken'])->name('receptionist.issue_token');
+    });
+});
+
+Adding Links to Navigation Menu
+
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+    <!-- Primary Navigation Menu -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex">
+                <!-- Logo -->
+                <div class="shrink-0 flex items-center">
+                    <a href="{{ route('dashboard') }}">
+                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    </a>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+
+                    @if(Auth::check() && Auth::user()->role == 'admin')
+                    <x-nav-link :href="route('admin')" :active="request()->routeIs('admin')">
+                        {{ __('Admin') }}
+                    </x-nav-link>
+                    @elseif(Auth::check() && Auth::user()->role == 'doctor')
+                    <x-nav-link :href="route('doctor')" :active="request()->routeIs('doctor')">
+                        {{ __('Doctor') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('doctor.diagnosis')" :active="request()->routeIs('doctor.diagnosis')">
+                        {{ __('Diagnose Patient') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('doctor.prescriptions')" :active="request()->routeIs('doctor.prescriptions')">
+                        {{ __('Issue Prescriptions') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('doctor.lab_reports')" :active="request()->routeIs('doctor.lab_reports')">
+                        {{ __('Write Lab Reports') }}
+                    </x-nav-link>
+                    @elseif(Auth::check() && Auth::user()->role == 'nurse')
+                    <x-nav-link :href="route('nurse')" :active="request()->routeIs('nurse')">
+                        {{ __('Nurse') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('nurse.basic_health')" :active="request()->routeIs('nurse.basic_health')">
+                        {{ __('Take Basic Health Status') }}
+                    </x-nav-link>
+                    @elseif(Auth::check() && Auth::user()->role == 'cashier')
+                    <x-nav-link :href="route('cashier')" :active="request()->routeIs('cashier')">
+                        {{ __('Cashier') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('cashier.create_bill')" :active="request()->routeIs('cashier.create_bill')">
+                        {{ __('Create Bill') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('cashier.update_payment')" :active="request()->routeIs('cashier.update_payment')">
+                        {{ __('Update Payment') }}
+                    </x-nav-link>
+                    @elseif(Auth::check() && Auth::user()->role == 'receptionist')
+                    <x-nav-link :href="route('receptionist')" :active="request()->routeIs('receptionist')">
+                        {{ __('Receptionist') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('receptionist.register_patient')" :active="request()->routeIs('receptionist.register_patient')">
+                        {{ __('Register Patient') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('receptionist.issue_token')" :active="request()->routeIs('receptionist.issue_token')">
+                        {{ __('Issue Token') }}
+                    </x-nav-link>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Settings Dropdown -->
+            <div class="hidden sm:flex sm:items-center sm:ml-6">
+                <x-dropdown align="right" width="48">
+                    <x-slot name="trigger">
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                            <div>{{ Auth::user()->name }}</div>
+
+                            <div class="ml-1">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </button>
+                    </x-slot>
+
+                    <x-slot name="content">
+                        <x-dropdown-link :href="route('profile.edit')">
+                            {{ __('Profile') }}
+                        </x-dropdown-link>
+
+                        <!-- Authentication -->
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+
+                            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-dropdown-link>
+                        </form>
+                    </x-slot>
+                </x-dropdown>
+            </div>
+
+            <!-- Hamburger -->
+            <div class="-mr-2 flex items-center sm:hidden">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Responsive Navigation Menu -->
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+
+            @if(Auth::check() && Auth::user()->role == 'admin')
+            <x-responsive-nav-link :href="route('admin')" :active="request()->routeIs('admin')">
+                {{ __('Admin') }}
+            </x-responsive-nav-link>
+            @elseif(Auth::check() && Auth::user()->role == 'doctor')
+            <x-responsive-nav-link :href="route('doctor')" :active="request()->routeIs('doctor')">
+                {{ __('Doctor') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('doctor.diagnosis')" :active="request()->routeIs('doctor.diagnosis')">
+                {{ __('Diagnose Patient') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('doctor.prescriptions')" :active="request()->routeIs('doctor.prescriptions')">
+                {{ __('Issue Prescriptions') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('doctor.lab_reports')" :active="request()->routeIs('doctor.lab_reports')">
+                {{ __('Write Lab Reports') }}
+            </x-responsive-nav-link>
+            @elseif(Auth::check() && Auth::user()->role == 'nurse')
+            <x-responsive-nav-link :href="route('nurse')" :active="request()->routeIs('nurse')">
+                {{ __('Nurse') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('nurse.basic_health')" :active="request()->routeIs('nurse.basic_health')">
+                {{ __('Take Basic Health Status') }}
+            </x-responsive-nav-link>
+            @elseif(Auth::check() && Auth::user()->role == 'cashier')
+            <x-responsive-nav-link :href="route('cashier')" :active="request()->routeIs('cashier')">
+                {{ __('Cashier') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('cashier.create_bill')" :active="request()->routeIs('cashier.create_bill')">
+                {{ __('Create Bill') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('cashier.update_payment')" :active="request()->routeIs('cashier.update_payment')">
+                {{ __('Update Payment') }}
+            </x-responsive-nav-link>
+            @elseif(Auth::check() && Auth::user()->role == 'receptionist')
+            <x-responsive-nav-link :href="route('receptionist')" :active="request()->routeIs('receptionist')">
+                {{ __('Receptionist') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('receptionist.register_patient')" :active="request()->routeIs('receptionist.register_patient')">
+                {{ __('Register Patient') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('receptionist.issue_token')" :active="request()->routeIs('receptionist.issue_token')">
+                {{ __('Issue Token') }}
+            </x-responsive-nav-link>
+            @endif
+        </div>
+
+        <!-- Responsive Settings Options -->
+        <div class="pt-4 pb-1 border-t border-gray-200">
+            <div class="px-4">
+                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+            </div>
+
+            <div class="mt-3 space-y-1">
+                <x-responsive-nav-link :href="route('profile.edit')">
+                    {{ __('Profile') }}
+                </x-responsive-nav-link>
+
+                <!-- Authentication -->
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+
+                    <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault();
+                                        this.closest('form').submit();">
+                        {{ __('Log Out') }}
+                    </x-responsive-nav-link>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+The corresponding methods are defined in your controllers
+
+DoctorController
+class DoctorController extends Controller
+{
+    public function index()
+    {
+        return view('doctor.index');
+    }
+
+    public function diagnosePatient()
+    {
+        return view('doctor.diagnosis');
+    }
+
+    public function issuePrescriptions()
+    {
+        return view('doctor.prescriptions');
+    }
+
+    public function writeLabReports()
+    {
+        return view('doctor.lab_reports');
+    }
+}
+
+NurseController
+public function index()
+    {
+        return view('nurse.index');
+    }
+
+    public function takeBasicHealthStatus()
+    {
+        return view('nurse.basic_health');
+    }
+
+CashierController
+public function index()
+    {
+        return view('cashier.index');
+    }
+
+    public function createBill()
+    {
+        return view('cashier.create_bill');
+    }
+
+    public function updatePayment()
+    {
+        return view('cashier.update_payment');
+    }
+
+ReceptionistController
+public function index()
+    {
+        return view('receptionist.index');
+    }
+
+    public function registerPatient()
+    {
+        return view('receptionist.register_patient');
+    }
+
+    public function issueToken()
+    {
+        return view('receptionist.issue_token');
+    }
+
+19.Implement the functionality for registering a patient in the ReceptionistController
+Create a migration to add a patients table with the specified fields
+php artisan make:migration create_patients_table
+
+Open the newly created migration file located at database/migrations directory and update it with the following code
+            $table->string('name');
+            $table->string('address');
+            $table->string('contact_information');
+            $table->date('dob');
+            $table->string('nic_number')->unique();
+            $table->enum('gender', ['Male', 'Female', 'Other']);
+
+Run the migration using the following command
+php artisan migrate
+
+Create a patient model
+	php artisan make:model Patient
+Update the patient model
+protected $fillable = [
+        'name',
+        'address',
+        'contact_information',
+        'dob',
+        'nic_number',
+        'gender',
+    ];
+
+Update the receptionist controller
+public function storePatient(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'contact_information' => 'required|string|max:255',
+            'dob' => 'required|date',
+            'nic_number' => 'required|string|max:255|unique:patients,nic_number',
+            'gender' => 'required|in:Male,Female,Other',
+        ]);
+
+        $patient = Patient::create($request->only([
+            'name', 'address', 'contact_information', 'dob', 'nic_number', 'gender'
+        ]));
+
+      
+        return redirect()->back()->with('success', 'Patient registered successfully.');
+    }
+
+show sweet alert message
+1.Install sweet alert
+composer require realrashid/sweet-alert
+
+Include 'sweetalert::alert' in master layout
+.......
+</div>
+    @include('sweetalert::alert')
+</body>
+
+</html>
+
+Run the below command to publish the package assets
+php artisan sweetalert:publish
+
+Update controller
+public function storePatient(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'contact_information' => 'required|string|max:255',
+            'dob' => 'required|date',
+            'nic_number' => 'required|string|max:255|unique:patients,nic_number',
+            'gender' => 'required|in:Male,Female,Other',
+        ]);
+
+        $patient = Patient::create($request->only([
+            'name', 'address', 'contact_information', 'dob', 'nic_number', 'gender'
+        ]));
+
+        
+        Alert::success('Patient registered successfully', 'Patient registered successfully');
+        return redirect()->back();
+    }
