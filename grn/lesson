@@ -1,29 +1,15 @@
-To create a simple Goods Received Note (GRN) system in Laravel 11 with JavaScript, we need to perform several steps. Below is an outline of the steps and sample code snippets to achieve this:
-
-Setup Laravel Project
-Create a Migration for GRN
-Create a Model and Controller
-Create Routes
-Create Blade Views
-Add JavaScript for Frontend Interactivity
+Goods Received Note (GRN) system 
 
 Step 1: Setup Laravel Project
-First, you need to set up a new Laravel project (if you don't already have one):
+
 composer create-project --prefer-dist laravel/laravel grn_system
 cd grn_system
 php artisan serve
 
 Step 2: Create a Migration for GRN
-Next, create a migration file for the GRN table:
 php artisan make:migration create_grns_table --create=grns
 
 In the generated migration file, define the schema for the GRN:
-// database/migrations/xxxx_xx_xx_xxxxxx_create_grns_table.php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
 class CreateGrnsTable extends Migration
 {
     public function up()
@@ -44,20 +30,8 @@ class CreateGrnsTable extends Migration
     }
 }
 
-Run the migration to create the table:
-php artisan migrate
-
-Step 3: Create a Model and Controller
-php artisan make:model Grn -mcr
-
 Create a migration for the products table:
 php artisan make:migration create_products_table --create=products
-// database/migrations/xxxx_xx_xx_xxxxxx_create_products_table.php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
 class CreateProductsTable extends Migration
 {
     public function up()
@@ -78,21 +52,18 @@ class CreateProductsTable extends Migration
         Schema::dropIfExists('products');
     }
 }
-Run the migrations:
+
+Run the migration to create the table:
 php artisan migrate
+
+Step 3: Create a Model and Controller
+php artisan make:model Grn -mcr
 
 Create Product model
 php artisan make:model Product
 
-
 Update the Grn and Product models to define the relationship:
-// app/Models/Grn.php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
+//Grn Model
 class Grn extends Model
 {
     use HasFactory;
@@ -105,13 +76,7 @@ class Grn extends Model
     }
 }
 
-// app/Models/Product.php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
+//Product Model
 class Product extends Model
 {
     use HasFactory;
