@@ -1,9 +1,9 @@
 Multi User Authentication System-Laravel Breeze
-1. Create Project
+1.Create Project
 composer create-project  laravel/laravel <projectname>
 composer create-project  laravel/laravel emed
 
-2. Configure your database
+2.Configure your database
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -758,3 +758,4 @@ public function storePatient(Request $request)
         Alert::success('Patient registered successfully', 'Patient registered successfully');
         return redirect()->back();
     }
+https://realrashid.github.io/sweet-alert/
