@@ -1,0 +1,29 @@
+How to deploy your laravel project to 000webhost(free)
+what you need
+1. zip project folder
+2. p unzipper
+3. database project file
+
+steps:
+1. open file manager 000webhost
+2. upload zip project folder and php unzipper in public_html
+3. go to your domain.000webhostappunzipper.php
+4. unzip the zip project folder
+5. move it to / except(htaccess and php unzipper)
+6. delete public_html folder then rename public folder to public_html
+7. open app/providers then edit AppServiceProvider.php to
+
+
+$this->app->bind('path.public', function(){
+	return base_path('public_html');
+});
+
+save
+8. open .env file copy the app_key except(base64:)
+9.open folder /config then edit app.php to
+
+'key'=>env('APP_KEY',base64_decode('yourkey')),
+
+10.make new database
+11. import database via sql file
+12. open .env file and set the databse credintils and APP_DEBUG=false and APP_URL to your url
