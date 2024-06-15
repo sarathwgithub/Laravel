@@ -702,10 +702,94 @@ protected $fillable = [
         'nic_number',
         'gender',
     ];
+Create Patient View,
+D:\software\xampp\htdocs\laravel_class\breeze\project1\resources\views\receptionist
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Patient Registration') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="max-w-full">
+                    <form method="POST" action="{{ route('receptionist.register_patient') }}">
+                        @csrf
+
+                        <div class="mb-4">
+                            <label for="name" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Name') }}</label>
+                            <input id="name" type="text" class="form-input rounded-md shadow-sm mt-1 block w-full" name="name" value="{{ old('name') }}" required autofocus>
+                            @error('name')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="address" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Address') }}</label>
+                            <input id="address" type="text" class="form-input rounded-md shadow-sm mt-1 block w-full" name="address" value="{{ old('address') }}" required>
+                            @error('address')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="contact_information" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Contact Information') }}</label>
+                            <input id="contact_information" type="text" class="form-input rounded-md shadow-sm mt-1 block w-full" name="contact_information" value="{{ old('contact_information') }}" required>
+                            @error('contact_information')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="dob" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Date of Birth') }}</label>
+                            <input id="dob" type="date" class="form-input rounded-md shadow-sm mt-1 block w-full" name="dob" value="{{ old('dob') }}" required>
+                            @error('dob')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="nic_number" class="block text-gray-700 text-sm font-bold mb-2">{{ __('NIC Number') }}</label>
+                            <input id="nic_number" type="text" class="form-input rounded-md shadow-sm mt-1 block w-full" name="nic_number" value="{{ old('nic_number') }}" required>
+                            @error('nic_number')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="gender" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Gender') }}</label>
+                            <select id="gender" class="form-select rounded-md shadow-sm mt-1 block w-full" name="gender" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            @error('gender')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Add more form fields as needed -->
+
+                        <x-primary-button class="ms-4">
+                            {{ __('Register') }}
+                        </x-primary-button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</x-app-layout>
+
 
 Update the receptionist controller
 use App\Models\Patient;
-
+public function registerPatient()
+    {
+        return view('receptionist.register_patient');
+    }
 public function storePatient(Request $request)
     {
         $request->validate([
@@ -724,6 +808,8 @@ public function storePatient(Request $request)
       
         return redirect()->back()->with('success', 'Patient registered successfully.');
     }
+update the route
+Route::post('/receptionist/register_patient', [ReceptionistController::class, 'storePatient'])->name('receptionist.register_patient');
 
 show sweet alert message
 1.Install sweet alert
@@ -740,7 +826,10 @@ Include 'sweetalert::alert' in master layout
 Run the below command to publish the package assets
 php artisan sweetalert:publish
 
+
 Update controller
+use RealRashid\SweetAlert\Facades\Alert;
+
 public function storePatient(Request $request)
     {
         $request->validate([
