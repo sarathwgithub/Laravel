@@ -868,6 +868,7 @@ $patients = Patient::all();
 return view('receptionist.index', compact('patients'));
 
 Create a View to Display Patients
+
 In index.blade.php in the resources/views/receptionist directory. This file will contain the HTML to display the patients in a table.
 <table >
             <thead>
@@ -1006,3 +1007,447 @@ Use Tailwind CSS in Blade Template
             </div>
         </div>
     </div>
+To add an admin role for registering doctors and creating a doctor details form with a corresponding controller in your Laravel application, follow these steps
+Create a Doctor Model and Migration
+php artisan make:model Doctor -m
+
+Update the migration file to include the necessary fields for the doctor details
+public function up(): void
+    {
+        Schema::create('doctors', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('specialization');
+            $table->string('contact_information');
+            $table->date('dob');
+            $table->string('nic_number')->unique();
+            $table->enum('gender', ['Male', 'Female', 'Other']);
+            $table->timestamps();
+        });
+    }
+Run the migration
+php artisan migrate
+
+Update the controller to include methods for viewing the admin dashboard, registering a doctor, and storing doctor details
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Doctor;
+use RealRashid\SweetAlert\Facades\Alert;
+
+class AdminController extends Controller
+{
+    public function index()
+    {
+        return view('admin.index');
+    }
+    public function registerDoctor()
+    {
+        return view('admin.register_doctor');
+    }
+
+    public function storeDoctor(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'specialization' => 'required|string|max:255',
+            'contact_information' => 'required|string|max:255',
+            'dob' => 'required|date',
+            'nic_number' => 'required|string|max:255|unique:doctors,nic_number',
+            'gender' => 'required|in:Male,Female,Other',
+        ]);
+
+        Doctor::create($request->only([
+            'name', 'specialization', 'contact_information', 'dob', 'nic_number', 'gender'
+        ]));
+
+        Alert::success('Doctor registered successfully', 'Doctor registered successfully');
+        return redirect()->back();
+    }
+}
+
+Update the D:\software\xampp\htdocs\laravel_class\emed-22062024\resources\views\layouts\navigation.blade.php
+<x-nav-link :href="route('admin.register_doctor')" :active="request()->routeIs('admin.register_doctor')">
+                        {{ __('Register Doctor') }}
+                    </x-nav-link>
+Update route
+Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+        Route::get('/admin/register-doctor', [AdminController::class, 'registerDoctor'])->name('admin.register_doctor');
+    });
+
+Create and update  Views for Admin
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Dashboard') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    {{ __("You're logged in!") }}
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+
+Create Doctor Registration Form View:
+php artisan make:view admin/register_doctor
+<!-- resources/views/admin/register_doctor.blade.php -->
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Register Doctor') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="max-w-full">
+                    @if(session('success'))
+                    <div>
+                        <span class="block sm:inline">{{ session('success') }}</span>
+                    </div>
+                    @endif
+                    <form method="POST" action="{{ route('admin.store_doctor') }}">
+                        @csrf
+
+                        <div class="mb-4">
+                            <label for="name" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Name') }}</label>
+                            <input id="name" type="text" class="form-input rounded-md shadow-sm mt-1 block w-full" name="name" value="{{ old('name') }}" required autofocus>
+                            @error('name')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="specialization" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Specialization') }}</label>
+                            <input id="specialization" type="text" class="form-input rounded-md shadow-sm mt-1 block w-full" name="specialization" value="{{ old('specialization') }}" required>
+                            @error('specialization')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="contact_information" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Contact Information') }}</label>
+                            <input id="contact_information" type="text" class="form-input rounded-md shadow-sm mt-1 block w-full" name="contact_information" value="{{ old('contact_information') }}" required>
+                            @error('contact_information')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="dob" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Date of Birth') }}</label>
+                            <input id="dob" type="date" class="form-input rounded-md shadow-sm mt-1 block w-full" name="dob" value="{{ old('dob') }}" required>
+                            @error('dob')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="nic_number" class="block text-gray-700 text-sm font-bold mb-2">{{ __('NIC Number') }}</label>
+                            <input id="nic_number" type="text" class="form-input rounded-md shadow-sm mt-1 block w-full" name="nic_number" value="{{ old('nic_number') }}" required>
+                            @error('nic_number')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="gender" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Gender') }}</label>
+                            <select id="gender" class="form-select rounded-md shadow-sm mt-1 block w-full" name="gender" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            @error('gender')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="flex items-center justify-end mt-4">
+                            <x-primary-button class="ml-4">
+                                {{ __('Register Doctor') }}
+                            </x-primary-button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+
+Update route
+Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+        Route::get('/admin/register-doctor', [AdminController::class, 'registerDoctor'])->name('admin.register_doctor');
+        Route::post('/admin/store-doctor', [AdminController::class, 'storeDoctor'])->name('admin.store_doctor');
+    });
+Update the Doctor model
+protected $fillable = [
+        'name',
+        'specialization',
+        'contact_information',
+        'dob',
+        'nic_number',
+        'gender',
+    ];
+
+To load the specializations from a database table and display them in a dropdown, you need to follow these steps:
+Create the Specialization model and migration
+
+Update the migration file to create the specializations table
+$table->id();
+            $table->string('name');
+            $table->timestamps();
+
+Run the migration to create the table:
+php artisan migrate
+
+Create a Seeder for the Specialization Table
+php artisan make:seeder SpecializationSeeder
+
+Define Sample Data in the Seeder
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\Specialization;
+
+class SpecializationSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $specializations = [
+            ['name' => 'Cardiology'],
+            ['name' => 'Neurology'],
+            ['name' => 'Pediatrics'],
+            ['name' => 'Orthopedics'],
+            ['name' => 'Dermatology'],
+        ];
+
+        foreach ($specializations as $specialization) {
+            Specialization::create($specialization);
+        }
+    }
+}
+
+Run the Seeder
+php artisan db:seed --class=SpecializationSeeder
+
+Update the AdminController to load specializations:
+use App\Models\Specialization;
+
+public function registerDoctor()
+    {
+        $specializations = Specialization::all();
+        return view('admin.register_doctor', compact('specializations'));
+        
+    }
+
+Update the form to use a dropdown for specializations
+<div class="mb-4">
+                            <label for="specialization" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Specialization') }}</label>
+                            <select id="specialization" class="form-select rounded-md shadow-sm mt-1 block w-full" name="specialization" required>
+                                <option value="">{{ __('Select Specialization') }}</option>
+                                @foreach($specializations as $specialization)
+                                    <option value="{{ $specialization->id }}">{{ $specialization->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('specialization')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+To show the registered doctors' details, you need to fetch the doctors from the database and pass them to a view. Then, you can display the doctors in a table format within the view. Here are the steps
+Update the AdminController
+use App\Models\Specialization;
+public function index()
+    {
+        $doctors = Doctor::with('specialization')->get();        
+        return view('admin.index', compact('doctors'));
+    }
+
+Create/Update the View to Display Doctors
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Dashboard') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Specialization</th>
+                                <th>Contact Information</th>
+                                <th>Date of Birth</th>
+                                <th>NIC Number</th>
+                                <th>Gender</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($doctors as $doctor)
+                            <tr>
+                                <td>{{ $doctor->id }}</td>
+                                <td>{{ $doctor->name }}</td>
+                                <td>{{ $doctor->specialization->name }}</td> <!-- Assuming specialization relation is defined -->
+                                <td>{{ $doctor->contact_information }}</td>
+                                <td>{{ $doctor->dob }}</td>
+                                <td>{{ $doctor->nic_number }}</td>
+                                <td>{{ $doctor->gender }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+
+Define the Relationship in the Doctor Model
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Doctor extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'name',
+        'specialization',
+        'contact_information',
+        'dob',
+        'nic_number',
+        'gender',
+    ];
+
+    public function specialization()
+    {
+        return $this->belongsTo(Specialization::class);
+    }
+}
+
+If you currently have the specialization field as a string in your doctors table and you want to normalize your database schema by creating a specialization_id foreign key that references the specializations table, you'll need to perform the following steps:
+
+Create a Migration to Add specialization_id Column
+php artisan make:migration add_specialization_id_to_doctors_table
+
+Modify the Migration File
+
+public function up(): void
+    {
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->unsignedBigInteger('specialization_id')->nullable();
+            $table->foreign('specialization_id')->references('id')->on('specializations');
+        });
+    }
+
+public function down(): void
+    {
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->dropForeign(['specialization_id']);
+            $table->dropColumn('specialization_id');
+        });
+    }
+
+Update your Doctor model to reflect the new relationship with Specialization.
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Doctor extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'name',
+        'specialization_id',
+        'contact_information',
+        'dob',
+        'nic_number',
+        'gender',
+    ];
+
+    public function specialization()
+    {
+        return $this->belongsTo(Specialization::class);
+    }
+}
+Create a new migration to remove the specialization field from the doctors table
+php artisan make:migration remove_specialization_from_doctors_table
+
+Open the generated migration file and modify it to remove the specialization field.
+public function up(): void
+    {
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->dropColumn('specialization');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->string('specialization')->nullable();
+        });
+    }
+Run the Migration
+php artisan migrate
+
+Update admin controller
+public function storeDoctor(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'specialization_id' => 'required|string|max:255',
+            'contact_information' => 'required|string|max:255',
+            'dob' => 'required|date',
+            'nic_number' => 'required|string|max:255|unique:doctors,nic_number',
+            'gender' => 'required|in:Male,Female,Other',
+        ]);
+
+        Doctor::create($request->only([
+            'name', 'specialization_id', 'contact_information', 'dob', 'nic_number', 'gender'
+        ]));
+
+        Alert::success('Doctor registered successfully', 'Doctor registered successfully');
+        return redirect()->back();
+    }
+
+Update the doctor register form
+<div class="mb-4">
+                            <label for="specialization" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Specialization') }}</label>
+                            <select id="specialization_id" class="form-select rounded-md shadow-sm mt-1 block w-full" name="specialization_id" required>
+                                <option value="">{{ __('Select Specialization') }}</option>
+                                @foreach($specializations as $specialization)
+                                <option value="{{ $specialization->id }}">{{ $specialization->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('specialization_id')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
