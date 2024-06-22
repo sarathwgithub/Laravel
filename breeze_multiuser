@@ -1451,3 +1451,77 @@ Update the doctor register form
                             <p class="text-red-500 text-xs italic">{{ $message }}</p>
                             @enderror
                         </div>
+To create a user account for a doctor when registering a doctor, you need to perform the following steps:
+Update the Doctor Registration Form
+<div class="mb-4">
+                            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Email') }}</label>
+                            <input id="email" type="email" class="form-input rounded-md shadow-sm mt-1 block w-full" name="email" value="{{ old('email') }}" required>
+                            @error('email')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Password') }}</label>
+                            <input id="password" type="password" class="form-input rounded-md shadow-sm mt-1 block w-full" name="password" required>
+                            @error('password')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label for="password_confirmation" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Confirm Password') }}</label>
+                            <input id="password_confirmation" type="password" class="form-input rounded-md shadow-sm mt-1 block w-full" name="password_confirmation" required>
+                            @error('password_confirmation')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+To add a user_id column as a foreign key in the doctors table, you'll need to create a migration. This migration will add the user_id column and set it up as a foreign key that references the id column in the users table.
+Create the Migration:
+php artisan make:migration add_user_id_to_doctors_table --table=doctors
+
+Define the Migration:
+public function up(): void
+    {
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->after('id'); // Add the user_id column
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); // Add the foreign key constraint
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->dropForeign(['user_id']); // Drop the foreign key constraint
+            $table->dropColumn('user_id'); // Drop the user_id column
+        });
+    }
+Run the Migration:
+php artisan migrate
+
+Modify the Controller to Create a User
+
+Update the storeDoctor method in the AdminController to create a user account for the doctor.
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+Ensure User and Doctor Models Are Related
+Add the necessary relationship in the Doctor model to link it with the User model.
+
+use App\Models\User;
+
+protected $fillable = [
+        'name',
+        'specialization_id',
+        'contact_information',
+        'dob',
+        'nic_number',
+        'gender',
+        'user_id', // Ensure this matches your database column
+    ];
+public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
