@@ -703,6 +703,8 @@ protected $fillable = [
         'gender',
     ];
 Create Patient View,
+php artisan make:view receptionist/register_patient
+
 D:\software\xampp\htdocs\laravel_class\breeze\project1\resources\views\receptionist
 <x-app-layout>
     <x-slot name="header">
@@ -811,7 +813,14 @@ public function storePatient(Request $request)
 update the route
 Route::post('/receptionist/register_patient', [ReceptionistController::class, 'storePatient'])->name('receptionist.register_patient');
 
-show sweet alert message
+Displays the success message. 
+@if(session('success'))
+	<div>
+                <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+@endif
+
+Show sweet alert message
 1.Install sweet alert
 composer require realrashid/sweet-alert
 
@@ -820,7 +829,6 @@ Include 'sweetalert::alert' in master layout
 </div>
     @include('sweetalert::alert')
 </body>
-
 </html>
 
 Run the below command to publish the package assets
@@ -850,3 +858,151 @@ public function storePatient(Request $request)
         return redirect()->back();
     }
 https://realrashid.github.io/sweet-alert/
+
+--------------------------------------------------------------------------------------------------
+To display the registered patients in a table after they are stored in the database
+Update Controller to Retrieve Patients:
+Modify the index method in your ReceptionistController to fetch all patients from the database and pass them to the view.
+
+$patients = Patient::all();
+return view('receptionist.index', compact('patients'));
+
+Create a View to Display Patients
+In index.blade.php in the resources/views/receptionist directory. This file will contain the HTML to display the patients in a table.
+<table >
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Contact Information</th>
+                    <th>Date of Birth</th>
+                    <th>NIC Number</th>
+                    <th>Gender</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($patients as $patient)
+                    <tr>
+                        <td>{{ $patient->id }}</td>
+                        <td>{{ $patient->name }}</td>
+                        <td>{{ $patient->address }}</td>
+                        <td>{{ $patient->contact_information }}</td>
+                        <td>{{ $patient->dob }}</td>
+                        <td>{{ $patient->nic_number }}</td>
+                        <td>{{ $patient->gender }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+use Tailwind CSS to style your table
+Install Tailwind CSS
+npm install -D tailwindcss
+npx tailwindcss init
+
+Configure Tailwind CSS
+Update the tailwind.config.js file to specify the paths to all of your template files:
+module.exports = {
+  content: [
+    './resources/**/*.blade.php',
+    './resources/**/*.js',
+    './resources/**/*.vue',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+Create Tailwind CSS File
+Create a tailwind.css file in the resources/css directory and include the Tailwind directives:
+/* resources/css/tailwind.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+Update Vite Configuration:
+Modify the vite.config.js file to include your Tailwind CSS file:
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+
+export default defineConfig({
+  plugins: [
+    laravel({
+      input: [
+        'resources/css/tailwind.css',
+        'resources/js/app.js',
+      ],
+      refresh: true,
+    }),
+  ],
+});
+
+Compile Your Assets:
+npm install
+npm run dev
+npm run build
+
+Use Tailwind CSS in Blade Template
+<div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    ID
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Name
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Address
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Contact Information
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date of Birth
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    NIC Number
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Gender
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($patients as $patient)
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $patient->id }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $patient->name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $patient->address }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $patient->contact_information }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $patient->dob }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $patient->nic_number }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $patient->gender }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
