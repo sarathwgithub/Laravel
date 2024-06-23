@@ -54,6 +54,11 @@
    php artisan migrate
 8. Updating the Controller to Create a User Account for Each Doctor
    ```php
+   use App\Models\User;
+   use App\Models\Doctor;
+   use App\Models\Specialization;
+   use Illuminate\Support\Facades\Hash;
+   use RealRashid\SweetAlert\Facades\Alert;
    public function storeDoctor(Request $request)
     {
         $request->validate([
