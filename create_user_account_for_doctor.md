@@ -52,4 +52,71 @@
 6. Run Migration
    ```html
    php artisan migrate
-8. 
+8. Updating the Controller to Create a User Account for Each Doctor
+   ```php
+   public function storeDoctor(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'specialization_id' => 'required|exists:specializations,id',
+            'contact_information' => 'required|string|max:255',
+            'dob' => 'required|date',
+            'nic_number' => 'required|string|max:255|unique:doctors,nic_number',
+            'gender' => 'required|in:Male,Female,Other',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'doctor',
+        ]);
+
+        Doctor::create([
+            'name' => $request->name,
+            'specialization_id' => $request->specialization_id,
+            'contact_information' => $request->contact_information,
+            'dob' => $request->dob,
+            'nic_number' => $request->nic_number,
+            'gender' => $request->gender,
+            'user_id' => $user->id,
+        ]);
+
+        Alert::success('Doctor registered successfully', 'Doctor registered successfully');
+        return redirect()->back();
+    }
+10. Ensure User and Doctor Models Are Related
+    *Add the necessary relationship in the Doctor model to link it with the User model.*
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+
+class Doctor extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'name',
+        'specialization_id',
+        'contact_information',
+        'dob',
+        'nic_number',
+        'gender',
+        'user_id', // Ensure this matches your database column
+    ];
+
+    public function specialization()
+    {
+        return $this->belongsTo(Specialization::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+
