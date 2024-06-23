@@ -25,3 +25,31 @@
                             @enderror
                         </div>
    ```
+2. Add user_id column as a foreign key in the doctors table
+      Create the Migration
+      ```html
+      php artisan make:migration add_user_id_to_doctors_table --table=doctors
+4. Define the Migration:
+   ```php
+   public function up(): void
+    {
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->after('id'); // Add the user_id column
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); // Add the foreign key constraint
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->dropForeign(['user_id']); // Drop the foreign key constraint
+            $table->dropColumn('user_id'); // Drop the user_id column
+        });
+    }
+6. Run Migration
+   ```html
+   php artisan migrate
+8. 
