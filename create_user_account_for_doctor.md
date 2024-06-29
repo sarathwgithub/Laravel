@@ -49,7 +49,7 @@
             $table->dropColumn('user_id'); // Drop the user_id column
         });
     }
-6. Run Migration
+6. Run Migration(before run the migration empty the doctor table)
    ```html
    php artisan migrate
 8. Updating the Controller to Create a User Account for Each Doctor
