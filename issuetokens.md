@@ -150,146 +150,164 @@
               return $this->hasMany(Token::class);
           }
 9. Create Blade View for Issuing Token
+      ```php
+           php artisan make:view receptionist/issue_token
+10. Update the view
 
     ```php
-          <!-- resources/views/receptionist/issue_token.blade.php -->
-          <x-app-layout>
-              <x-slot name="header">
-                  <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                      {{ __('Issue Token') }}
-                  </h2>
-              </x-slot>
-          
-              <div class="py-12">
-                  <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                      <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                          <div class="max-w-full">
-                              @if(session('success'))
-                              <div>
-                                  <span class="block sm:inline">{{ session('success') }}</span>
+                <!-- resources/views/receptionist/issue_token.blade.php -->
+                  <x-app-layout>
+                      <x-slot name="header">
+                          <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                              {{ __('Issue Token') }}
+                          </h2>
+                      </x-slot>
+            
+                      <div class="py-12">
+                          <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+                              <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                                  <div class="max-w-full">
+                                      @if(session('success'))
+                                      <div>
+                                          <span class="block sm:inline">{{ session('success') }}</span>
+                                      </div>
+                                      @endif
+                                      <form method="POST" action="{{ route('receptionist.store_token') }}">
+                                          @csrf
+            
+                                          <!-- Specialization Selection -->
+                                          <div class="mb-4">
+                                              <label for="specialization_id" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Specialization') }}</label>
+                                              <select id="specialization_id" class="form-select rounded-md shadow-sm mt-1 block w-full" name="specialization_id" required>
+                                                  <option value="">--</option>
+                                                  @foreach($specializations as $specialization)
+                                                  <option value="{{ $specialization->id }}">{{ $specialization->name }}</option>
+                                                  @endforeach
+                                              </select>
+                                              @error('specialization_id')
+                                              <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                                              @enderror
+                                          </div>
+            
+                                          <!-- Date Selection -->
+                                          <div class="mb-4">
+                                              <label for="date" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Date') }}</label>
+                                              <input id="date" type="date" class="form-input rounded-md shadow-sm mt-1 block w-full" name="date" required>
+                                              @error('date')
+                                              <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                                              @enderror
+                                          </div>
+            
+                                          <!-- Doctor Selection -->
+                                          <div class="mb-4">
+                                              <label for="doctor_id" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Doctor') }}</label>
+                                              <select id="doctor_id" class="form-select rounded-md shadow-sm mt-1 block w-full" name="doctor_id" required>
+            
+                                                  <!-- Options will be populated by JavaScript -->
+                                              </select>
+                                              @error('doctor_id')
+                                              <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                                              @enderror
+                                          </div>
+                                          <div class="mb-4">
+                                              <label for="patient_id" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Patient') }}</label>
+                                              <select id="patient_id" class="form-select rounded-md shadow-sm mt-1 block w-full" name="patient_id" required>
+                                                  <option value="">Select Patient</option>
+                                                  @foreach($patients as $patient)
+                                                  <option value="{{ $patient->id }}">{{ $patient->name }}</option>
+                                                  @endforeach
+                                              </select>
+                                          </div>
+                                          <!-- Next Appointment Number -->
+                                          <div class="mb-4">
+                                              <label for="appointment_number" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Next Appointment Number') }}</label>
+                                              <input id="appointment_number" type="number" class="form-input rounded-md shadow-sm mt-1 block w-full" name="appointment_number" required readonly>
+                                              @error('appointment_number')
+                                              <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                                              @enderror
+                                          </div>
+            
+                                          <x-primary-button class="ms-4">
+                                              {{ __('Confirm') }}
+                                          </x-primary-button>
+                                      </form>
+                                  </div>
                               </div>
-                              @endif
-                              <form method="POST" action="{{ route('receptionist.store_token') }}">
-                                  @csrf
-          
-                                  <!-- Specialization Selection -->
-                                  <div class="mb-4">
-                                      <label for="specialization_id" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Specialization') }}</label>
-                                      <select id="specialization_id" class="form-select rounded-md shadow-sm mt-1 block w-full" name="specialization_id" required>
-                                          <option value="">--</option>
-                                          @foreach($specializations as $specialization)
-                                          <option value="{{ $specialization->id }}">{{ $specialization->name }}</option>
-                                          @endforeach
-                                      </select>
-                                      @error('specialization_id')
-                                      <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                                      @enderror
-                                  </div>
-          
-                                  <!-- Date Selection -->
-                                  <div class="mb-4">
-                                      <label for="date" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Date') }}</label>
-                                      <input id="date" type="date" class="form-input rounded-md shadow-sm mt-1 block w-full" name="date" required>
-                                      @error('date')
-                                      <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                                      @enderror
-                                  </div>
-          
-                                  <!-- Doctor Selection -->
-                                  <div class="mb-4">
-                                      <label for="doctor_id" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Doctor') }}</label>
-                                      <select id="doctor_id" class="form-select rounded-md shadow-sm mt-1 block w-full" name="doctor_id" required>
-                                          <!-- Options will be populated by JavaScript -->
-                                      </select>
-                                      @error('doctor_id')
-                                      <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                                      @enderror
-                                  </div>
-                                  <div class="mb-4">
-                                      <label for="patient_id" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Patient') }}</label>
-                                      <select id="patient_id" class="form-select rounded-md shadow-sm mt-1 block w-full" name="patient_id" required>
-                                          <option value="">Select Patient</option>
-                                          @foreach($patients as $patient)
-                                          <option value="{{ $patient->id }}">{{ $patient->name }}</option>
-                                          @endforeach
-                                      </select>
-                                  </div>
-                                  <!-- Next Appointment Number -->
-                                  <div class="mb-4">
-                                      <label for="appointment_number" class="block text-gray-700 text-sm font-bold mb-2">{{ __('Next Appointment Number') }}</label>
-                                      <input id="appointment_number" type="number" class="form-input rounded-md shadow-sm mt-1 block w-full" name="appointment_number" required readonly>
-                                      @error('appointment_number')
-                                      <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                                      @enderror
-                                  </div>
-          
-                                  <x-primary-button class="ms-4">
-                                      {{ __('Confirm') }}
-                                  </x-primary-button>
-                              </form>
                           </div>
                       </div>
-                  </div>
-              </div>
-          </x-app-layout>
-          
-          <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-          <script>
-              $(document).ready(function() {
-                  $('#specialization_id, #date').on('change', loadDoctors);
-          
-                  function loadDoctors() {
-                      const specializationId = $('#specialization_id').val();
-                      const date = $('#date').val();
-                      const doctorSelect = $('#doctor_id');
-          
-                      if (specializationId && date) {
-                          $.ajax({
-                              url: `/receptionist/get-doctors/${specializationId}/${date}`,
-                              method: 'GET',
-                              success: function(doctors) {
-                                  console.log('Fetched doctors:', doctors); // Debugging line
-                                  doctorSelect.empty(); // Clear previous options
-          
-                                  if (doctors.length > 0) {
-                                      $.each(doctors, function(index, doctor) {
+                  </x-app-layout>
+            
+                  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                  <script>
+                      $(document).ready(function() {
+                          $('#specialization_id, #date').on('change', loadDoctors);
+            
+                          function loadDoctors() {
+                              const specializationId = $('#specialization_id').val();
+                              const date = $('#date').val();
+                              const doctorSelect = $('#doctor_id');
+            
+                              if (specializationId && date) {
+                                  $.ajax({
+                                      url: `/receptionist/get-doctors/${specializationId}/${date}`,
+                                      method: 'GET',
+                                      success: function(doctors) {
+                                          console.log('Fetched doctors:', doctors); // Debugging line
+                                          doctorSelect.empty(); // Clear previous options
+            
                                           doctorSelect.append(
                                               $('<option>', {
-                                                  value: doctor.id,
-                                                  text: doctor.name
+                                                  value: '',
+                                                  text: '--'
                                               })
                                           );
-                                      });
-                                  } else {
-                                      doctorSelect.append(
-                                          $('<option>', {
-                                              text: 'No doctors available'
-                                          })
-                                      );
-                                  }
-                              },
-                              error: function(error) {
-                                  console.error('Error fetching doctors:', error); // Debugging line
+            
+                                          if (doctors.length > 0) {
+                                              $.each(doctors, function(index, doctor) {
+                                                  doctorSelect.append(
+                                                      $('<option>', {
+                                                          value: doctor.id,
+                                                          text: doctor.name
+                                                      })
+                                                  );
+                                              });
+                                          } else {
+                                              doctorSelect.append(
+                                                  $('<option>', {
+                                                      text: 'No doctors available'
+                                                  })
+                                              );
+                                          }
+                                      },
+                                      error: function(error) {
+                                          console.error('Error fetching doctors:', error); // Debugging line
+                                      }
+                                  });
                               }
-                          });
-                      }
-                  }
-          
-                  $('#doctor_id').on('change', function() {
-                      const doctorId = $(this).val();
-          
-                      $.ajax({
-                          url: `/receptionist/get-next-appointment-number/${doctorId}`,
-                          method: 'GET',
-                          success: function(data) {
-                              console.log('Next appointment number:', data); // Debugging line
-                              $('#appointment_number').val(data.next_appointment_number);
-                          },
-                          error: function(error) {
-                              console.error('Error fetching next appointment number:', error); // Debugging line
                           }
+            
+                          $('#doctor_id').on('change', function() {
+                              const doctorId = $(this).val();
+            
+                              $.ajax({
+                                  url: `/receptionist/get-next-appointment-number/${doctorId}`,
+                                  method: 'GET',
+                                  success: function(data) {
+                                      console.log('Next appointment number:', data); // Debugging line
+                                      $('#appointment_number').val(data.next_appointment_number);
+                                  },
+                                  error: function(error) {
+                                      console.error('Error fetching next appointment number:', error); // Debugging line
+                                  }
+                              });
+                          });
                       });
-                  });
-              });
-          </script>
-10. 
+                  </script>
+11. Add a route for fetching doctors by specialization
+    ```php
+        Route::get('/receptionist/issue-token', [ReceptionistController::class, 'issueToken'])->name('receptionist.issue_token');
+        Route::post('/receptionist/issue-token', [ReceptionistController::class, 'storeToken'])->name('receptionist.store_token');
+        Route::get('/receptionist/get-doctors/{specialization}', [ReceptionistController::class, 'getDoctorsBySpecialization']);
+        Route::get('/receptionist/get-doctors/{specialization}/{date}', [ReceptionistController::class, 'getDoctorsBySpecializationAndDate']);
+        Route::get('/receptionist/get-next-appointment-number/{doctorId}', [ReceptionistController::class, 'getNextAppointmentNumber']);
+12. 
