@@ -5,6 +5,8 @@
 1. Create a dashboard where the doctor can view their upcoming appointments.
    In doctor controller update the below code
    ```php
+         use App\Models\Token;
+         use Illuminate\Support\Facades\Auth;
          public function index()
         {
             // Get the logged-in user
@@ -109,4 +111,23 @@
 9. Define the Route
     ```php
           Route::post('/doctor/add-diagnosis/{appointmentId}', [DoctorController::class, 'addDiagnosis'])->name('doctor.addDiagnosis');
-10. 
+10. Ensure your controller method addDiagnosis accepts the correct parameter:
+      ```php
+            public function addDiagnosis(Request $request, $appointmentId)
+             {
+                 $appointment = Token::findOrFail($appointmentId);
+         
+                 // Validate and store diagnosis and prescription
+                 $validatedData = $request->validate([
+                     'diagnosis' => 'required|string',
+                     'prescription' => 'required|string',
+                 ]);
+         
+                 // Update appointment with diagnosis and prescription details
+                 $appointment->diagnosis = $validatedData['diagnosis'];
+                 $appointment->prescription = $validatedData['prescription'];
+                 $appointment->save();
+         
+                 return redirect()->back()->with('success', 'Diagnosis and prescription saved successfully.');
+             }
+11. 
