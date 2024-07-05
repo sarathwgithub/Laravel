@@ -27,3 +27,5 @@ save
 10.make new database
 11. import database via sql file
 12. open .env file and set the databse credintils and APP_DEBUG=false and APP_URL to your url
+
+https://www.000webhost.com/forum/t/deploy-laravel-project-on-000webhost/127323
