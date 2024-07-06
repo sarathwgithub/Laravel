@@ -391,5 +391,62 @@
           Route::post('/doctor/diagnosis/{appointmentId}/drug', [DoctorController::class, 'addDrugDetails'])->name('doctor.addDrugDetails');
           Route::post('/doctor/diagnosis/{appointmentId}/lab', [DoctorController::class, 'addLabReport'])->name('doctor.addLabReport');
       ```
-22.  
+22.  Update Form with Diagnosis Field to basic details 
+      ```html
+          <label>Diagnosis:</label>
+          <textarea class="block mt-1 w-full" name="diagnosis">{{ $appointment->diagnosis ?? '' }}</textarea><br>
+      ```
+23.  Update the DoctorController to handle the diagnosis details and save them to the diagnosis column in the tokens table.
+      ```php
+          public function addBasicDetails(Request $request, $appointmentId)
+          {
+              $appointment = Token::findOrFail($appointmentId);
+      
+              $validatedData = $request->validate([
+                  'height' => 'required|numeric',
+                  'weight' => 'required|numeric',
+                  'bmi' => 'required|numeric',
+                  'pressure_level_1' => 'required|numeric',
+                  'pressure_level_2' => 'required|numeric',
+                  'heart_rate' => 'required|numeric',
+              ]);
+      
+              HealthDetail::updateOrCreate(
+                  ['token_id' => $appointmentId],
+                  $validatedData
+              );
+      
+              $appointment->diagnosis = $request->diagnosis;
+              $appointment->save();
+      
+              return response()->json(['success' => 'Basic health details saved successfully.']);
+          }
+      ```
+24.  Ensure your models have the necessary relationships defined
+      ```php
+         class Token extends Model
+         {
+             use HasFactory;
+         
+             protected $fillable = [
+                 'doctor_id', 'patient_id', 'appointment_number', 'issue_time', 'diagnosis'
+             ];
+         
+             public function healthDetails()
+             {
+                 return $this->hasMany(HealthDetail::class);
+             }
+         
+             public function drugs()
+             {
+                 return $this->hasMany(Drug::class);
+             }
+         
+             public function labReports()
+             {
+                 return $this->hasMany(LabReport::class);
+             }
+         }
+      ```
+25.  
 
