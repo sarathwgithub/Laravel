@@ -1,3 +1,6 @@
+1. Create Project
+composer create-project  laravel/laravel <projectname>
+
 How to deploy your laravel project to 000webhost(free)
 what you need
 1. zip project folder
