@@ -391,12 +391,33 @@
           Route::post('/doctor/diagnosis/{appointmentId}/drug', [DoctorController::class, 'addDrugDetails'])->name('doctor.addDrugDetails');
           Route::post('/doctor/diagnosis/{appointmentId}/lab', [DoctorController::class, 'addLabReport'])->name('doctor.addLabReport');
       ```
-22.  Update Form with Diagnosis Field to basic details 
+22. add Diagnosis Field to tokens tale
+    php artisan make:migration add_diagnosis_to_tokens_table --table=tokens
+24. Update the migration
+       ```php
+          public function up(): void
+          {
+              Schema::table('tokens', function (Blueprint $table) {
+                  $table->text('diagnosis')->nullable();
+              });
+          }
+      
+          /**
+           * Reverse the migrations.
+           */
+          public function down(): void
+          {
+              Schema::table('tokens', function (Blueprint $table) {
+                  $table->dropColumn('diagnosis');
+              });
+          }
+       ```
+26.  Update Form with Diagnosis Field to basic details 
       ```html
           <label>Diagnosis:</label>
           <textarea class="block mt-1 w-full" name="diagnosis">{{ $appointment->diagnosis ?? '' }}</textarea><br>
       ```
-23.  Update the DoctorController to handle the diagnosis details and save them to the diagnosis column in the tokens table.
+27.  Update the DoctorController to handle the diagnosis details and save them to the diagnosis column in the tokens table.
       ```php
           public function addBasicDetails(Request $request, $appointmentId)
           {
@@ -422,7 +443,7 @@
               return response()->json(['success' => 'Basic health details saved successfully.']);
           }
       ```
-24.  Ensure your models have the necessary relationships defined
+28.  Ensure your models have the necessary relationships defined
       ```php
          class Token extends Model
          {
@@ -448,5 +469,5 @@
              }
          }
       ```
-25.  
+29.  
 
