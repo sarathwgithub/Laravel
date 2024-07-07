@@ -70,46 +70,48 @@
           }
       ```
 6.   Create Views for Cashier
-      View for Finished Diagnoses
-         ```php
-            <!-- resources/views/cashier/finished_diagnoses.blade.php -->
-            <x-app-layout>
-                <x-slot name="header">
-                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                        {{ __('Finished Diagnoses') }}
-                    </h2>
-                </x-slot>
-            
-                <div class="py-12">
-                    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                        <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                            <table class="min-w-full leading-normal">
-                                <thead>
-                                    <tr>
-                                        <th>Patient Name</th>
-                                        <th>Token No</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($tokens as $token)
-                                    <tr>
-                                        <td>{{ $token->patient->name }}</td>
-                                        <td>{{ $token->id }}</td>
-                                        <td>
-                                            <a href="{{ route('cashier.makePayment', $token->id) }}" class="btn btn-primary">Make Payment</a>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+     View for Finished Diagnoses
+     
+       ```php
+                <!-- resources/views/cashier/finished_diagnoses.blade.php -->
+                <x-app-layout>
+                    <x-slot name="header">
+                        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                            {{ __('Finished Diagnoses') }}
+                        </h2>
+                    </x-slot>
+                
+                    <div class="py-12">
+                        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+                            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                                <table class="min-w-full leading-normal">
+                                    <thead>
+                                        <tr>
+                                            <th>Patient Name</th>
+                                            <th>Token No</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($tokens as $token)
+                                        <tr>
+                                            <td>{{ $token->patient->name }}</td>
+                                            <td>{{ $token->id }}</td>
+                                            <td>
+                                                <a href="{{ route('cashier.makePayment', $token->id) }}" class="btn btn-primary">Make Payment</a>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </x-app-layout>
-         ```
-     View for Payment Form
-         ```php
+                </x-app-layout>
+       ```
+   View for Payment Form
+   
+        ```php
             <!-- resources/views/cashier/payment_form.blade.php -->
             <x-app-layout>
                 <x-slot name="header">
@@ -150,57 +152,31 @@
                     </div>
                 </div>
             </x-app-layout>
-         ```
-     Create Payment Success View
-         ```php
-            <!-- resources/views/cashier/payment_success.blade.php -->
-            <x-app-layout>
-                <x-slot name="header">
-                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                        {{ __('Payment Success for Token ') . $token->id }}
-                    </h2>
-                </x-slot>
-            
-                <div class="py-12">
-                    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                        <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                            <h3>Payment processed successfully!</h3>
-                            <p>Token ID: {{ $token->id }}</p>
-                            <p>Patient Name: {{ $token->patient->name }}</p>
-                            <!-- Add more details as needed -->
+        ```
+Create Payment Success View
+     
+            ```php
+                <!-- resources/views/cashier/payment_success.blade.php -->
+                <x-app-layout>
+                    <x-slot name="header">
+                        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                            {{ __('Payment Success for Token ') . $token->id }}
+                        </h2>
+                    </x-slot>
+                
+                    <div class="py-12">
+                        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+                            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                                <h3>Payment processed successfully!</h3>
+                                <p>Token ID: {{ $token->id }}</p>
+                                <p>Patient Name: {{ $token->patient->name }}</p>
+                                <!-- Add more details as needed -->
+                            </div>
                         </div>
                     </div>
-                </div>
-            </x-app-layout>
+                </x-app-layout>
+            ```
 
-         ```
-8.   Add Diagnosis Column to Tokens Table
-      ```
-          php artisan make:migration add_diagnosis_to_tokens_table --table=tokens
-      ```
-9.  In the migration file, add the diagnosis column
-      ```
-         public function up(): void
-        {
-            Schema::table('tokens', function (Blueprint $table) {
-                $table->text('diagnosis')->nullable();
-            });
-        }
-    
-        /**
-         * Reverse the migrations.
-         */
-        public function down(): void
-        {
-            Schema::table('tokens', function (Blueprint $table) {
-                $table->dropColumn('diagnosis');
-            });
-        }
-      ```
-10.   Run the migration:
-        ```
-          php artisan migrate
-        ```
 11.   Update Routes
       ```php
           Route::get('/cashier/make-payment/{token}', [CashierController::class, 'showPaymentForm'])->name('cashier.makePayment');
